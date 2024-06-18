@@ -1,0 +1,21 @@
+*{
+    margin:0;
+    box-sizing: border-box;
+    padding:0;
+    overflow: hidden;
+}
+#canvasMain{
+    border:solid 2px black;
+    position: absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%, -45%);
+}
+#gameOver{
+    display:none;
+}
+h1{
+    text-align: center;
+    font-size: 50px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
