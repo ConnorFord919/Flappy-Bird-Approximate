@@ -9,35 +9,40 @@ const grid = Array.from({ length: canvas.height / gridInterval }, () => []);
 const spawnPoint = {x: (canvas.width / gridInterval)/2, y: 1}
 const blocks = [
     function straightLine (){
+        currentCenter = {row: spawnPoint.y, col: spawnPoint.x };
         grid[spawnPoint.y-1][spawnPoint.x] = 'x';
         grid[spawnPoint.y][spawnPoint.x] = 'x';
         grid[spawnPoint.y+1][spawnPoint.x] = 'x';
+        grid[spawnPoint.y+2][spawnPoint.x] = 'x';
     },
-
 ]
 let score = 0;
 let currentCenter;
 
+const shiftDown = (row, col) => {
+    currentCenter = {row: row, col: col}
+    grid[row][col] = '';
+    grid[row+1][col] = 'x';
+}
+
 document.addEventListener('keypress', e => {
-    console.log(e)
-    switch(e){
-        case e.code === 'KeyR': 
+    switch(e.code){
+        case 'KeyR': 
             rotateBlock();
             break;
 
-        case e.code === 'KeyD':
+        case 'KeyD':
             for (let i = 0; i < grid.length; i++) {
                 for (let j = (canvas.width/gridInterval) - 1; j >= 0; j--) {
                     if(grid[i][j] === 'x' && grid[i][j+1] !== 'x' && grid[i][j+1] !== '*' && j !== canvas.width / gridInterval-1){
                         grid[i][j] = '';
                         grid[i][j+1] = 'x';
-    
                     } 
                 }
             }
             break;
         
-        case e.code === 'KeyA':
+        case 'KeyA':
             for (let i = 0; i < grid.length; i++) {
                 for (let j = 0; j < canvas.width / gridInterval; j++) {
                     if(grid[i][j] === 'x' && grid[i][j-1] !== 'x' && grid[i][j+1] !== '*' && j !== 0){
@@ -48,12 +53,11 @@ document.addEventListener('keypress', e => {
             }
             break;
         
-        case e.code === 'KeyS':
-            for (let i = 0; i < grid.length; i++) {
+        case 'KeyS':
+            for (let i = (canvas.height / gridInterval) - 1; i >= 0; i--) { 
                 for (let j = 0; j < canvas.width / gridInterval; j++) {
-                if(grid[i][j] === 'x' && grid[i+1][j] !== '*'){
-                        grid[i][j] = '';
-                        grid[i+1][j] = 'x';
+                    if(grid[i][j] === 'x' && grid[i+1][j] !== '*'){
+                        shiftDown(i,j);
                     } 
                 }
             }
@@ -65,9 +69,41 @@ document.addEventListener('keypress', e => {
 const rotateBlock = () => {
     const positions = [];
     const gridCopy = [...grid];
-    //matrix rotation black box
-    //
-    //
+    //Take a 5x5 or so chunk out of the grid as a copy 
+    //Do matrix math on this smaller chunk 
+    //somehow smack the 5x5 or so chunk in the copy arr then look for x pos
+    //place at x pos found
+    /*
+    
+
+    const N = 3;
+    
+    // Function to rotate the matrix 90 degree clockwise
+    function rotate90Clockwise(a) {
+    
+        // Traverse each cycle
+        for (let i = 0; i < N / 2; i++) {
+            for (let j = i; j < N - i - 1; j++) {
+            
+                // Swap elements of each cycle
+                // in clockwise direction
+                let temp = a[i][j];
+                a[i][j] = a[N - 1 - j][i];
+                a[N - 1 - j][i] = a[N - 1 - i][N - 1 - j];
+                a[N - 1 - i][N - 1 - j] = a[j][N - 1 - i];
+                a[j][N - 1 - i] = temp;
+            }
+        }
+    }*/
+    
+    const matrixSquare = [];
+    for(let i = currentCenter.row - 3; i < currentCenter.row + 3; i++){
+        matrixSquare.push(gridCopy[i]);
+        for(let j = currentCenter.col - 3; j < currentCenter.col + 3; j++){
+            matrixSquare.push(matrixSquare[j]);
+        }
+    }
+    console.log(matrixSquare)
     for (let i = 0; i < gridCopy.length; i++) {
         for (let j = 0; j < gridCopy[i].length; j++) {
             if(grid[i][j] === 'x' ) positions.push({row: i, col: j});
@@ -138,10 +174,11 @@ setInterval(() => {
         checkRow(i)
         for (let j = 0; j < (canvas.width / gridInterval); j++) {
             if (grid[i][j] === 'x') {
+                newPiece = false;
                 if(i !== canvas.height / gridInterval-1 && grid[i + 1][j] !== 'x' && grid[i + 1][j] !== '*'){
                     grid[i][j] = '';
                     if (i < (canvas.height / gridInterval) - 1) {
-                        grid[i + 1][j] = 'x';
+                        shiftDown(i,j);
                     }
                     else grid[i][j] = '*';
                 }   
@@ -155,6 +192,7 @@ setInterval(() => {
         }
     }
     if(newPiece) spawnBlock();
+    console.log(currentCenter)
 }, 200)
 
 const animate = () => {
@@ -165,12 +203,16 @@ const animate = () => {
         for(let j = 0; j < grid[i].length; j ++){
             if(grid[i][j] === ''){
                 ctx.fillStyle = 'white'
+                ctx.strokeStyle = 'white'
             }
             else {
                 ctx.fillStyle = 'blue'
+                ctx.strokeStyle = 'black'
             }
             ctx.beginPath()
+            ctx.lineWidth = 3;
             ctx.rect(j*gridInterval, i*gridInterval, gridInterval, gridInterval);
+            ctx.stroke()
             ctx.fill();
             ctx.closePath()
         }
