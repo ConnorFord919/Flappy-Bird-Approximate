@@ -38,6 +38,7 @@ class Tile {
         this.clicked = false;
         this.color = 'green';
         this.size = gridInterval;
+        this.number = 0;
     }
     draw(){
         ctx.beginPath();
@@ -59,9 +60,23 @@ class Tile {
             } else {
                 this.color = 'green';
             }
+            const row = this.position.y / gridInterval;
+            const col = this.position.x / gridInterval;
+            if(row > 0 && row < canvas.height / gridInterval - 1){
+                if(grid[row-1][col] === Mine) this.number ++;
+                if(grid[row+1][col] === Mine)this.number ++;
+                if(grid[row][col-1] === Mine) this.number++;
+                if(grid[row][col+1] === Mine) this.number++;
+                if(grid[row-1][col-1] === Mine) this.number++;
+                if(grid[row+1][col-1] === Mine) this.number++;
+                if(grid[row+1][col+1] === Mine) this.number++;
+                if(grid[row-1][col+1] === Mine) this.number++;
+            }
+            
             this.handleClicked()
         }   
         this.draw();
+        console.log(this.number)
     }
 }
 

@@ -54,13 +54,12 @@ const restartGame = () => {
   gameRunning = true;
 }
 
-const animate = () => {
-    requestAnimationFrame(animate);
-    ctx.clearRect(0,0, canvas.width, canvas.height);
-    pipes.forEach((pipe) => {
-        pipe.update();
-    })
-    player.update();
-}
-animate();
+setInterval(() => {
+  ctx.clearRect(0,0, canvas.width, canvas.height);
+  pipes.forEach((pipe) => {
+      pipe.update();
+  })
+  player.update();
+}, 5)
+
 pipeSpawner();

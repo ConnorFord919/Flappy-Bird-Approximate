@@ -16,15 +16,75 @@ const blocks = [
 
 ]
 let score = 0;
+let currentCenter;
 
+document.addEventListener('keypress', e => {
+    console.log(e)
+    switch(e){
+        case e.code === 'KeyR': 
+            rotateBlock();
+            break;
 
-canvas.addEventListener('mousedown', e => {
+        case e.code === 'KeyD':
+            for (let i = 0; i < grid.length; i++) {
+                for (let j = (canvas.width/gridInterval) - 1; j >= 0; j--) {
+                    if(grid[i][j] === 'x' && grid[i][j+1] !== 'x' && grid[i][j+1] !== '*' && j !== canvas.width / gridInterval-1){
+                        grid[i][j] = '';
+                        grid[i][j+1] = 'x';
+    
+                    } 
+                }
+            }
+            break;
+        
+        case e.code === 'KeyA':
+            for (let i = 0; i < grid.length; i++) {
+                for (let j = 0; j < canvas.width / gridInterval; j++) {
+                    if(grid[i][j] === 'x' && grid[i][j-1] !== 'x' && grid[i][j+1] !== '*' && j !== 0){
+                        grid[i][j] = '';
+                        grid[i][j-1] = 'x';
+                    } 
+                }
+            }
+            break;
+        
+        case e.code === 'KeyS':
+            for (let i = 0; i < grid.length; i++) {
+                for (let j = 0; j < canvas.width / gridInterval; j++) {
+                if(grid[i][j] === 'x' && grid[i+1][j] !== '*'){
+                        grid[i][j] = '';
+                        grid[i+1][j] = 'x';
+                    } 
+                }
+            }
+            break;
 
+    }
 })
 
-
-
-
+const rotateBlock = () => {
+    const positions = [];
+    const gridCopy = [...grid];
+    //matrix rotation black box
+    //
+    //
+    for (let i = 0; i < gridCopy.length; i++) {
+        for (let j = 0; j < gridCopy[i].length; j++) {
+            if(grid[i][j] === 'x' ) positions.push({row: i, col: j});
+        }
+    }
+    clearGrid();
+    positions.forEach((position) => {
+        grid[position.row][position.col] = 'x';
+    })
+}
+const clearGrid = () => {
+    for (let i = 0; i < grid.length; i++) {
+        for (let j = 0; j < grid[i].length; j++) {
+            if(grid[i][j] === 'x') grid[i][j] = '';
+        }
+    }
+}
 
 const endGame = () => {
     gameRunning = false;
@@ -73,12 +133,12 @@ const spawnBlock = () => {
     blocks[0]();
 }
 setInterval(() => {
-    for (let i = (canvas.height / gridInterval) - 2; i >= 0; i--) { 
-        checkRow(canvas.height/gridInterval-1)
+    let newPiece = true;
+    for (let i = (canvas.height / gridInterval) - 1; i >= 0; i--) { 
         checkRow(i)
         for (let j = 0; j < (canvas.width / gridInterval); j++) {
             if (grid[i][j] === 'x') {
-                if(grid[i + 1][j] !== 'x' && grid[i + 1][j] !== '*'){
+                if(i !== canvas.height / gridInterval-1 && grid[i + 1][j] !== 'x' && grid[i + 1][j] !== '*'){
                     grid[i][j] = '';
                     if (i < (canvas.height / gridInterval) - 1) {
                         grid[i + 1][j] = 'x';
@@ -86,11 +146,16 @@ setInterval(() => {
                     else grid[i][j] = '*';
                 }   
                 else grid[i][j] = '*';
+            }else if(grid[i][j] === '*'){
+                if(i !== canvas.height / gridInterval-1 && grid[i + 1][j] !== '*'){
+                    grid[i][j] = '';
+                    grid[i+1][j] = '*';
+                }
             }
         }
     }
-    console.log(grid)
-}, 1000)
+    if(newPiece) spawnBlock();
+}, 200)
 
 const animate = () => {
     checkGameEnd();

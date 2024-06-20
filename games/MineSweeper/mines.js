@@ -23,6 +23,7 @@ canvas.addEventListener('mousedown', e => {
     if(firstMine){
         firstClick(index)
     }
+    console.log(grid)
     grid[index.y][index.x].clicked = true;
     firstMine = false;
 })
@@ -38,7 +39,6 @@ const endGame = () => {
 }
 
 const firstClick = (index) => {
-    console.log(grid)
     grid[index.y+1][index.x].clicked = true;
     grid[index.y-1][index.x].clicked = true;
     grid[index.y][index.x+1].clicked = true;
@@ -50,13 +50,12 @@ const firstClick = (index) => {
     grid[index.y+1][index.x-1].clicked = true;
     for (let i = 0; i < grid.length; i ++) {
         for(let j = 0; j < grid[i].length; j ++){
-            const tipper = Math.random() * 10;
+            const tipper = Math.random() * 15;
             if(!grid[i][j].clicked && tipper < 5){
                 grid[i][j] = new Mine(j * gridInterval, i * gridInterval)
             }
         }
     }
-    console.log(grid)
 }
 const init = () => {    
     for (let i = 0; i < grid.length; i++) {
