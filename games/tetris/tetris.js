@@ -2,10 +2,9 @@ const canvas = document.getElementById('canvasMain');
 const ctx = canvas.getContext('2d');
 
 canvas.width = 500;
-canvas.height = 800;
+canvas.height = 1000;
 const gridInterval = 50;
 const grid = Array.from({ length: canvas.height / gridInterval }, () => []);
-//const fallSpeed = 0.05;
 const spawnPoint = {x: (canvas.width / gridInterval)/2, y: 1}
 const blocks = [
     function straightLine (){
@@ -15,9 +14,53 @@ const blocks = [
         grid[spawnPoint.y+1][spawnPoint.x] = 'x';
         grid[spawnPoint.y+2][spawnPoint.x] = 'x';
     },
+    function l (){
+        currentCenter = {row: spawnPoint.y, col: spawnPoint.x };
+        grid[spawnPoint.y-1][spawnPoint.x] = 'x';
+        grid[spawnPoint.y][spawnPoint.x] = 'x';
+        grid[spawnPoint.y+1][spawnPoint.x] = 'x';
+        grid[spawnPoint.y+1][spawnPoint.x+1] = 'x';
+    },
+    function j (){
+        currentCenter = {row: spawnPoint.y, col: spawnPoint.x };
+        grid[spawnPoint.y-1][spawnPoint.x] = 'x';
+        grid[spawnPoint.y][spawnPoint.x] = 'x';
+        grid[spawnPoint.y+1][spawnPoint.x] = 'x';
+        grid[spawnPoint.y+1][spawnPoint.x-1] = 'x';
+    },
+    function tri (){
+        currentCenter = {row: spawnPoint.y, col: spawnPoint.x };
+        grid[spawnPoint.y-1][spawnPoint.x] = 'x';
+        grid[spawnPoint.y][spawnPoint.x] = 'x';
+        grid[spawnPoint.y][spawnPoint.x-1] = 'x';
+        grid[spawnPoint.y][spawnPoint.x+1] = 'x';
+    },
+    function quad (){
+        currentCenter = {row: spawnPoint.y, col: spawnPoint.x };
+        grid[spawnPoint.y-1][spawnPoint.x] = 'x';
+        grid[spawnPoint.y][spawnPoint.x] = 'x';
+        grid[spawnPoint.y-1][spawnPoint.x+1] = 'x';
+        grid[spawnPoint.y][spawnPoint.x+1] = 'x';
+    },
+    function s (){
+        currentCenter = {row: spawnPoint.y, col: spawnPoint.x };
+        grid[spawnPoint.y][spawnPoint.x] = 'x';
+        grid[spawnPoint.y][spawnPoint.x+1] = 'x';
+        grid[spawnPoint.y+1][spawnPoint.x] = 'x';
+        grid[spawnPoint.y+1][spawnPoint.x-1] = 'x';
+    },
+    function z (){
+        currentCenter = {row: spawnPoint.y, col: spawnPoint.x };
+        grid[spawnPoint.y][spawnPoint.x] = 'x';
+        grid[spawnPoint.y][spawnPoint.x-1] = 'x';
+        grid[spawnPoint.y-1][spawnPoint.x] = 'x';
+        grid[spawnPoint.y-1][spawnPoint.x+1] = 'x';
+    },
 ]
+const speed = 2;
 let score = 0;
 let currentCenter;
+let currentBlock;
 
 const shiftDown = (row, col) => {
     currentCenter = {row: row, col: col}
@@ -67,26 +110,13 @@ document.addEventListener('keypress', e => {
 })
 
 const rotateBlock = () => {
-    const positions = [];
-    const gridCopy = [...grid];
-    //Take a 5x5 or so chunk out of the grid as a copy 
-    //Do matrix math on this smaller chunk 
-    //somehow smack the 5x5 or so chunk in the copy arr then look for x pos
-    //place at x pos found
-    /*
-    
-
-    const N = 3;
-    
-    // Function to rotate the matrix 90 degree clockwise
+    const intitialPositions = [];    
+    const finalPositions = [];    
+    const matrixSquare = Array.from({ length: 20 }, () => Array(20).fill(''));
+    const N = matrixSquare.length;
     function rotate90Clockwise(a) {
-    
-        // Traverse each cycle
         for (let i = 0; i < N / 2; i++) {
             for (let j = i; j < N - i - 1; j++) {
-            
-                // Swap elements of each cycle
-                // in clockwise direction
                 let temp = a[i][j];
                 a[i][j] = a[N - 1 - j][i];
                 a[N - 1 - j][i] = a[N - 1 - i][N - 1 - j];
@@ -94,24 +124,26 @@ const rotateBlock = () => {
                 a[j][N - 1 - i] = temp;
             }
         }
-    }*/
-    
-    const matrixSquare = [];
-    for(let i = currentCenter.row - 3; i < currentCenter.row + 3; i++){
-        matrixSquare.push(gridCopy[i]);
-        for(let j = currentCenter.col - 3; j < currentCenter.col + 3; j++){
-            matrixSquare.push(matrixSquare[j]);
+    }
+    for (let i = 0; i < grid.length; i++) {
+        for (let j = 0; j < grid[i].length; j++) {
+            if(grid[i][j] === 'x' ) intitialPositions.push({row: i, col: j});
         }
     }
-    console.log(matrixSquare)
-    for (let i = 0; i < gridCopy.length; i++) {
-        for (let j = 0; j < gridCopy[i].length; j++) {
-            if(grid[i][j] === 'x' ) positions.push({row: i, col: j});
+    intitialPositions.forEach((a) => {
+        matrixSquare[a.row][a.col] = 'x';
+    });
+    rotate90Clockwise(matrixSquare);
+    for (let i = 0; i < matrixSquare.length; i++) { 
+        for (let j = 0; j < matrixSquare[i].length; j++) {
+            if(matrixSquare[i][j] === 'x' ){
+                finalPositions.push({row: i, col: j});
+            }
         }
     }
-    clearGrid();
-    positions.forEach((position) => {
-        grid[position.row][position.col] = 'x';
+    clearGrid()
+    finalPositions.forEach((a) => {
+        grid[a.row][a.col] = 'x';
     })
 }
 const clearGrid = () => {
@@ -165,8 +197,8 @@ const checkGameEnd = () => {
 
 }
 const spawnBlock = () => {
-    //const block = blockTypes[Math.random() * blockTypes.length - 1];
-    blocks[0]();
+    currentBlock = Math.round(Math.random() * (blocks.length - 1));
+    blocks[currentBlock]();
 }
 setInterval(() => {
     let newPiece = true;
@@ -192,8 +224,7 @@ setInterval(() => {
         }
     }
     if(newPiece) spawnBlock();
-    console.log(currentCenter)
-}, 200)
+}, speed * 100)
 
 const animate = () => {
     checkGameEnd();
